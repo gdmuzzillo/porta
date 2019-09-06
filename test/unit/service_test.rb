@@ -606,14 +606,6 @@ class ServiceTest < ActiveSupport::TestCase
     assert_not_includes Service.of_approved_accounts, service
   end
 
-  test 'create with backend_version oidc' do
-    account = FactoryBot.create(:simple_provider)
-    service_params = { backend_version: 'oidc', name: 'test', deployment_option: 'self_managed' }
-    service = account.create_service(service_params)
-
-    assert service.persisted?
-  end
-
   test '.permitted_for_user' do
     FactoryBot.create_list(:simple_service, 2)
     user = User.new

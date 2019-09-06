@@ -22,8 +22,4 @@ it('should display a select to choose a backend API from, or create a new one', 
   expect(select.containsAllMatchingElements(
     backendApis.map(api => <option value={api.id}>{api.name}</option>)
   )).toBe(true)
-
-  expect(select.containsMatchingElement(
-    <option value="">Create a new Backend API</option>
-  )).toBe(true)
 })

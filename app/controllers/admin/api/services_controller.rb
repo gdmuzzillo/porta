@@ -46,7 +46,9 @@ class Admin::Api::ServicesController < Admin::Api::ServiceBaseController
   ##~ op.parameters.add :name => " ", :dataType => "custom", :paramType => "query", :allowMultiple => true, :description => "Extra parameters"
   #
   def create
-    service = current_account.create_service(service_params)
+    service = current_account.accessible_services.new(service_params)
+    create_service = CreateServiceWithBackendApi.new(service: service, backend_api_id: params[:backend_api_id].presence)
+    create_service.call
     service.reload if service.persisted? # It has been touched
     respond_with(service)
   end

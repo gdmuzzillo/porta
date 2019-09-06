@@ -30,13 +30,14 @@ class Api::IntegrationsController < Api::BaseController
       proxy_pro_update
     elsif @proxy.save_and_deploy(proxy_params)
       environment = @proxy.service_mesh_integration? ? 'Production' : 'Staging'
+      api_backend = @proxy.api_backend
       flash[:notice] = flash_message(:update_success, environment: environment)
       update_onboarding_mapping_bubble
       update_mapping_rules_position
 
       if @proxy.send_api_test_request!
         onboarding.bubble_update('api')
-        done_step(:api_sandbox_traffic) if ApiClassificationService.test(@proxy.api_backend).real_api?
+        done_step(:api_sandbox_traffic) if api_backend && ApiClassificationService.test(api_backend).real_api?
         return redirect_to edit_path
       end
       render :edit

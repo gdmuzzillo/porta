@@ -362,7 +362,9 @@ class Proxy < ApplicationRecord
   end
 
   def skip_test_request?
-    service.oauth? || saas_configuration_driven_apicast_self_managed?
+    # !backend_api || service.oauth? || saas_configuration_driven_apicast_self_managed? This should be improved like
+    # pointed here: https://github.com/3scale/porta/pull/1168#discussion_r323736488
+    return true
   end
 
   def send_api_test_request!
@@ -472,7 +474,6 @@ class Proxy < ApplicationRecord
 
 
   delegate :provider_key, to: :provider
-
 
   def sandbox_host
     URI(sandbox_endpoint || set_sandbox_endpoint).host

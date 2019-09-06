@@ -5,15 +5,18 @@ Feature: Edit Integration
   I want to be able to edit the integration
 
   Background:
-    Given a provider is logged in
+    Given a provider with backend api is logged in
      And all the rolling updates features are off
      And apicast registry is stubbed
 
-  Scenario: Edit a tested integration has a link to the analytics usage
-    Given the service has been successfully tested
-    When I go to the service integration page
-     And I follow "the analytics section"
-    Then I should be on the provider stats usage page
+
+  # Since we are skiping the test request, this is not rendered anymore.
+  # Check this for the discussion: https://github.com/3scale/porta/pull/1168#discussion_r323736488
+  # Scenario: Edit a tested integration has a link to the analytics usage
+  #   Given the service has been successfully tested
+  #   When I go to the service integration page
+  #    And I follow "the analytics section"
+  #   Then I should be on the provider stats usage page
 
   # TODO: remove it when the Coffeescript is migrated to React
   Scenario: Changing the Authentication method should display the right curl command
