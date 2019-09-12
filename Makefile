@@ -55,11 +55,6 @@ docker: ## Prints docker version and info
 	@docker info
 	@echo
 
-test-run: ## Runs test inside container
-test-run: COMPOSE_FILE = $(COMPOSE_TEST_FILE)
-test-run: $(DOCKER_COMPOSE) clean-tmp cache
-	$(DOCKER_COMPOSE) run --name $(PROJECT)-build $(DOCKER_ENV) build $(CMD)
-
 tmp-export: ## Copies files from inside docker container to local tmp folder.
 tmp-export: IMAGE ?= $(PROJECT)-build
 tmp-export: clean-tmp
