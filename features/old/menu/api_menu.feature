@@ -55,7 +55,7 @@ Feature: API menu
     | Settings                  |
 
   Scenario: Integration sub menu structure for API as Product
-    Given the account has Service acting as Product
+    Given the account has api_as_product rolling update enabled
     When I follow "Overview"
     And I follow "Integration" within the main menu
     Then I should see menu items
