@@ -10,30 +10,103 @@ class Admin::Api::BackendApis::MetricsController < Admin::Api::BaseController
 
   representer Metric
 
-  # TODO: paginate or no need?
-  # TODO: ApiDocs :) and only when the RU is enabled
+
+  ##~ @parameter_backend_api_id_by_id_name = { :name => "backend_api_id", :description => "ID of the backend API.", :dataType => "int", :required => true, :paramType => "path" }
+
+
+  ##~ sapi = source2swagger.namespace("Account Management API")
+  ##~ e = sapi.apis.add
+  ##~ e.path = "/admin/api/backend_apis/:backend_api_id/metrics"
+  ##~ e.responseClass = "List[metric]"
+  #
+  ##~ op            = e.operations.add
+  ##~ op.httpMethod = "GET"
+  ##~ op.summary    = "Backend API Metric List"
+  ##~ op.description = "Returns the list of metrics of a backend api."
+  ##~ op.group = "metric"
+  #
+  ##~ op.parameters.add @parameter_access_token
+  ##~ op.parameters.add @parameter_backend_api_id_by_id_name
+  #
   def index
-    # TODO: top_level_metrics or all? nested?
     respond_with(backend_api.metrics)
   end
 
-  # TODO: ApiDocs :) and only when the RU is enabled
+  ##~ e = sapi.apis.add
+  ##~ e.path = "/admin/api/backend_apis/:backend_api_id/metrics/:id"
+  ##~ e.responseClass = "metric"
+  #
+  ##~ op = e.operations.add
+  ##~ op.httpMethod = "GET"
+  ##~ op.summary    = "Backend API Metric Read"
+  ##~ op.description = "Returns the metric of a backend api."
+  ##~ op.group = "metric"
+  #
+  ##~ op.parameters.add @parameter_access_token
+  ##~ op.parameters.add @parameter_backend_api_id_by_id_name
+  ##~ op.parameters.add @parameter_metric_id_by_id
+  #
   def show
     respond_with(metric)
   end
 
-  # TODO: ApiDocs :) and only when the RU is enabled
+  ##~ e = sapi.apis.add
+  ##~ e.path = "/admin/api/backend_apis/:backend_api_id/metrics"
+  ##~ e.responseClass = "metric"
+  #
+  ##~ op = e.operations.add
+  ##~ op.httpMethod = "POST"
+  ##~ op.summary    = "Backend API Metric Create"
+  ##~ op.description = "Creates a metric on a backend api."
+  ##~ op.group = "metric"
+  #
+  ##~ op.parameters.add @parameter_access_token
+  ##~ op.parameters.add @parameter_backend_api_id_by_id_name
+  ##~ op.parameters.add :name => "friendly_name", :description => "Descriptive Name of the metric.", :dataType => "string", :allowMultiple => false, :required => true, :paramType => "query"
+  ##~ op.parameters.add :name => "system_name", :description => "System Name of the metric. If blank a system_name will be generated for you from the friendly_name parameter", :dataType => "string", :allowMultiple => false, :required => false, :paramType => "query"
+  ##~ op.parameters.add :name => "name", :description => "DEPRECATED: Please use system_name parameter", :dataType => "string", :allowMultiple => false, :required => false, :paramType => "query"
+  ##~ op.parameters.add :name => "unit", :description => "Measure unit of the metric.", :dataType => "string", :allowMultiple => false, :required => true, :paramType => "query"
+  ##~ op.parameters.add :name => "description", :description => "Description of the metric.", :dataType => "text", :allowMultiple => false, :required => false, :paramType => "query"
+  #
   def create
     respond_with(backend_api.metrics.create(metric_params))
   end
 
-  # TODO: ApiDocs :) and only when the RU is enabled
+  ##~ e = sapi.apis.add
+  ##~ e.path = "/admin/api/backend_apis/:backend_api_id/metrics/:id"
+  ##~ e.responseClass = "metric"
+  #
+  ##~ op = e.operations.add
+  ##~ op.httpMethod = "PUT"
+  ##~ op.summary    = "Backend API Metric Update"
+  ##~ op.description = "Updates the metric of a backend api."
+  ##~ op.group = "metric"
+  #
+  ##~ op.parameters.add @parameter_access_token
+  ##~ op.parameters.add @parameter_backend_api_id_by_id_name
+  ##~ op.parameters.add @parameter_metric_id_by_id
+  ##~ op.parameters.add :name => "friendly_name", :description => "Name of the metric.", :dataType => "string", :allowMultiple => false, :required => false, :paramType => "query"
+  ##~ op.parameters.add :name => "unit", :description => "Measure unit of the metric.", :dataType => "string", :allowMultiple => false, :required => false, :paramType => "query"
+  ##~ op.parameters.add :name => "description", :description => "Description of the metric.", :dataType => "text", :allowMultiple => false, :required => false, :paramType => "query"
+  #
   def update
     metric.update(metric_params)
     respond_with(metric)
   end
 
-  # TODO: ApiDocs :) and only when the RU is enabled
+  ##~ e = sapi.apis.add
+  ##~ e.path = "/admin/api/backend_apis/:backend_api_id/metrics/:id"
+  #
+  ##~ op            = e.operations.add
+  ##~ op.httpMethod = "DELETE"
+  ##~ op.summary    = "Backend API Metric Delete"
+  ##~ op.description = "Deletes the metric of a backend api. When you delete a metric or a method, it will also remove all the associated limits."
+  ##~ op.group = "metric"
+  #
+  ##~ op.parameters.add @parameter_access_token
+  ##~ op.parameters.add @parameter_backend_api_id_by_id_name
+  ##~ op.parameters.add @parameter_metric_id_by_id
+  #
   def destroy
     metric.destroy
     respond_with(metric)
@@ -41,19 +114,26 @@ class Admin::Api::BackendApis::MetricsController < Admin::Api::BaseController
 
   private
 
-  def authorize
-    authorize! :manage, BackendApi
-  end
+  DEFAULT_PARAMS = %i[friendly_name system_name unit description].freeze
+  private_constant :DEFAULT_PARAMS
 
   def metric
     @metric ||= backend_api.metrics.find(params[:id])
   end
 
-  def backend_api
-    @backend_api ||= current_account.backend_apis.find(params[:backend_api_id]) # TODO: only the accessible backend apis once #1144 is merged
+  def authorize
+    authorize! :manage, BackendApi
   end
 
-  def metric_params
-    params.require(:metric).permit(:friendly_name, :system_name, :unit, :description) # TODO: careful with the system name!!
+  def backend_api
+    @backend_api ||= current_account.backend_apis.find(params[:id])
+  end
+
+  def create_params
+    params.require(:backend_api).permit(DEFAULT_PARAMS | %i[system_name])
+  end
+
+  def update_params
+    params.require(:backend_api).permit(DEFAULT_PARAMS)
   end
 end

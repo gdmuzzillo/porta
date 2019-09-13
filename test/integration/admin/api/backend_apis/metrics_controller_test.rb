@@ -13,7 +13,8 @@ class Admin::API::BackendApis::MetricsControllerTest < ActionDispatch::Integrati
   attr_reader :backend_api, :access_token_value, :tenant
 
   test 'index' do
-    FactoryBot.create_list(:metric, 2, owner: backend_api)
+    FactoryBot.create(:metric, owner: backend_api, parent_id: hits)
+
     FactoryBot.create(:metric, owner: FactoryBot.create(:backend_api, account: tenant))
     FactoryBot.create(:metric, service: FactoryBot.create(:service, account: tenant))
 
@@ -21,7 +22,7 @@ class Admin::API::BackendApis::MetricsControllerTest < ActionDispatch::Integrati
 
     assert_response :success
     assert(response_collection_metrics_of_backend_api = JSON.parse(response.body)['metrics'])
-    assert_equal backend_api.metrics.count, response_collection_metrics_of_backend_api.length
+    assert_equal 2, response_collection_metrics_of_backend_api.length
     response_collection_metrics_of_backend_api.each do |response_metric|
       assert backend_api.metrics.find_by(id: response_metric.dig('metric', 'id'))
     end
@@ -93,7 +94,20 @@ class Admin::API::BackendApis::MetricsControllerTest < ActionDispatch::Integrati
     assert_response :forbidden
   end
 
+  test 'system_name can be created but not updated' do
+    post admin_api_backend_api_metrics_path(backend_api_id: backend_api.id, access_token: access_token_value), { friendly_name: 'metric friendly name', unit: 'hit', system_name: 'edited', system_name: 'first-system-name', parent_id: hits.id }
+    metric = backend_api.metrics.last!
+    assert_equal 'first-system-name', metric.system_name
+
+    put admin_api_backend_api_metric_path(backend_api_id: backend_api.id, access_token: access_token_value, id: metric.id), { friendly_name: 'metric friendly name', unit: 'hit', system_name: 'edited' }
+    assert_equal 'first-system-name', metric.reload.system_name
+  end
+
   private
+
+  def hits
+    @hits ||= backend_api.metrics.hits || FactoryBot.create(:metric, owner: backend_api, system_name: 'hits')
+  end
 
   def metric
     @metric ||= FactoryBot.create(:metric, owner: backend_api)
